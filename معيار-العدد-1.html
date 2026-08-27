@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مِعيار العدد | قواعد العدد والمعدود</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161c26;
+    --panel:#1f2836;
+    --gold:#c9a227;
+    --gold-soft:#e6c866;
+    --parchment:#ece3cf;
+    --parchment-dim:#a8a190;
+    --good:#5a9c6e;
+    --bad:#b8615a;
+    --line:#39435633;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 8%, #232d3d 0%, transparent 45%),
+      radial-gradient(circle at 90% 85%, #232d3d 0%, transparent 40%),
+      var(--ink);
+    color:var(--parchment);
+    font-family:'Tajawal', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .stage{ width:100%; max-width:820px; }
+  header.site{ text-align:center; margin-bottom:26px; }
+  .brand-mark{ width:78px;height:78px;margin:0 auto 10px; display:block; }
+  h1.site-title{
+    font-family:'Aref Ruqaa', serif; font-weight:700; font-size:2.5rem;
+    color:var(--gold-soft); margin:0 0 4px; letter-spacing:1px;
+  }
+  .site-sub{ color:var(--parchment-dim); font-size:.95rem; margin:0; }
+  .card{
+    background:linear-gradient(180deg,#232e3f,#1c2532);
+    border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 18px 40px -20px rgba(0,0,0,.6);
+  }
+
+  .levels{ display:grid; gap:16px; margin-top:10px; }
+  .level-card{
+    padding:22px 22px; display:flex; align-items:center; gap:18px;
+    cursor:pointer; transition:transform .15s ease, border-color .15s ease; position:relative; overflow:hidden;
+  }
+  .level-card:hover{ transform:translateY(-3px); border-color:var(--gold); }
+  .level-card:focus-visible{ outline:2px solid var(--gold-soft); outline-offset:3px; }
+  .level-num{
+    font-family:'Aref Ruqaa', serif; font-size:2.6rem; color:var(--gold); line-height:1;
+    min-width:54px; text-align:center; border-left:1px solid var(--line); padding-left:16px;
+  }
+  .level-info h3{ margin:0 0 4px; font-size:1.25rem; color:var(--parchment); font-family:'Aref Ruqaa', serif; font-weight:700; }
+  .level-info p{ margin:0; color:var(--parchment-dim); font-size:.9rem; line-height:1.6; }
+  .level-meta{ margin-inline-start:auto; text-align:center; color:var(--gold-soft); font-size:.8rem; white-space:nowrap; }
+
+  .quiz-wrap{ padding:22px 20px 26px; }
+  .quiz-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; color:var(--parchment-dim); font-size:.85rem; }
+  .progress-track{ height:6px; background:#101620; border-radius:6px; overflow:hidden; margin-bottom:22px; }
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-soft)); width:0%; transition:width .3s ease; }
+  .q-sentence{
+    font-size:1.15rem; line-height:2.1; background:#141b26; border:1px solid var(--line);
+    border-radius:10px; padding:16px 18px; margin-bottom:18px;
+  }
+  .q-sentence .num{ color:var(--gold-soft); font-weight:700; font-family:'Aref Ruqaa', serif; }
+  .q-title{ font-size:1rem; color:var(--parchment); margin:0 0 14px; font-weight:500; }
+  .options{ display:grid; gap:10px; }
+  .opt{
+    text-align:right; background:#1a2230; border:1px solid var(--line); color:var(--parchment);
+    padding:13px 16px; border-radius:10px; font-size:1rem; font-family:'Tajawal', sans-serif;
+    cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .opt:hover{ border-color:var(--gold); }
+  .opt.correct{ background:#1f3227; border-color:var(--good); color:#cdeed6; }
+  .opt.wrong{ background:#33201f; border-color:var(--bad); color:#f1cfcc; }
+  .opt[disabled]{ cursor:default; }
+  .explain{ margin-top:16px; display:none; }
+  .explain-box{
+    padding:13px 16px; border-radius:10px; background:#141b26; border:1px dashed var(--line);
+    font-size:.92rem; line-height:1.9; color:var(--parchment-dim); margin-bottom:10px;
+  }
+  .explain-box.is-wrong{ border-color:var(--bad); background:#241715; color:#e9c9c5; }
+  .explain-box.is-right{ border-color:var(--good); background:#16221a; color:#cfe6d5; }
+  .explain-box b{ color:inherit; }
+  .footer-row{ display:flex; justify-content:space-between; margin-top:20px; }
+  button.primary, button.ghost{
+    font-family:'Tajawal', sans-serif; font-size:.95rem; padding:10px 22px; border-radius:10px;
+    cursor:pointer; border:1px solid var(--gold);
+  }
+  button.primary{ background:var(--gold); color:#1c1305; font-weight:700; }
+  button.primary:disabled{ opacity:.35; cursor:not-allowed; }
+  button.ghost{ background:transparent; color:var(--parchment-dim); border-color:var(--line); }
+  button.ghost:hover{ border-color:var(--gold); color:var(--parchment); }
+
+  .results{ padding:30px 22px; text-align:center; }
+  .score-ring{ width:150px;height:150px; margin:0 auto 18px; position:relative; }
+  .score-ring svg{ transform:rotate(-90deg); }
+  .score-ring .pct{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Aref Ruqaa', serif; font-size:1.8rem; color:var(--gold-soft);
+  }
+  .results h2{ font-family:'Aref Ruqaa', serif; color:var(--parchment); margin:6px 0 4px; }
+  .results p.msg{ color:var(--parchment-dim); margin-bottom:22px; }
+  .review-list{ text-align:right; display:grid; gap:10px; margin:20px 0; max-height:340px; overflow-y:auto; padding-inline-end:6px; }
+  .review-item{ background:#141b26; border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:.88rem; }
+  .review-item .rq{ color:var(--parchment); margin-bottom:6px; }
+  .review-item .ra{ color:var(--bad); }
+  .review-item .rc{ color:var(--good); }
+  .results .footer-row{ justify-content:center; gap:12px; }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+  @media (max-width:520px){
+    h1.site-title{ font-size:1.9rem; }
+    .level-card{ padding:16px; gap:12px; }
+    .level-num{ font-size:2rem; min-width:40px; padding-left:10px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="site">
+    <svg class="brand-mark" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <line x1="50" y1="18" x2="50" y2="78" stroke="#c9a227" stroke-width="2.5"/>
+      <line x1="18" y1="30" x2="82" y2="30" stroke="#c9a227" stroke-width="2.5"/>
+      <line x1="18" y1="30" x2="10" y2="52" stroke="#c9a227" stroke-width="2"/>
+      <line x1="18" y1="30" x2="26" y2="52" stroke="#c9a227" stroke-width="2"/>
+      <path d="M6 52 Q18 66 30 52" stroke="#e6c866" stroke-width="2" fill="none"/>
+      <line x1="82" y1="30" x2="74" y2="52" stroke="#c9a227" stroke-width="2"/>
+      <line x1="82" y1="30" x2="90" y2="52" stroke="#c9a227" stroke-width="2"/>
+      <path d="M70 52 Q82 66 94 52" stroke="#e6c866" stroke-width="2" fill="none"/>
+      <circle cx="50" cy="14" r="5" fill="#c9a227"/>
+      <text x="18" y="46" font-family="Aref Ruqaa, serif" font-size="12" fill="#ece3cf" text-anchor="middle">٣</text>
+      <text x="82" y="46" font-family="Aref Ruqaa, serif" font-size="12" fill="#ece3cf" text-anchor="middle">٣</text>
+      <line x1="34" y1="78" x2="66" y2="78" stroke="#c9a227" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <h1 class="site-title">مِعيار العدد</h1>
+    <p class="site-sub">تدرّب على قواعد العدد والمعدود — مادة اللغة العربية (١٠١) — ثلاثة مستويات، ٥٠ سؤالًا في كل مستوى</p>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ======================= بيانات وقواعد توليد الأسئلة ======================= */
+
+const pairs = [
+  {m:'طالب', mp:'طلاب',    f:'طالبة',  fp:'طالبات'},
+  {m:'معلم', mp:'معلمون',  f:'معلمة',  fp:'معلمات'},
+  {m:'مهندس',mp:'مهندسون', f:'مهندسة', fp:'مهندسات'},
+  {m:'طبيب', mp:'أطباء',   f:'طبيبة',  fp:'طبيبات'},
+  {m:'لاعب', mp:'لاعبون',  f:'لاعبة',  fp:'لاعبات'},
+  {m:'جندي', mp:'جنود',    f:'جندية',  fp:'جنديات'},
+  {m:'كاتب', mp:'كتّاب',   f:'كاتبة',  fp:'كاتبات'},
+  {m:'مدرّس',mp:'مدرّسون', f:'مدرّسة', fp:'مدرّسات'},
+  {m:'مهاجر',mp:'مهاجرون', f:'مهاجرة', fp:'مهاجرات'},
+  {m:'موظف', mp:'موظفون',  f:'موظفة',  fp:'موظفات'}
+];
+
+const nums3to10 = [
+  {v:3, ta:'ثلاثة', noTa:'ثلاث'},
+  {v:4, ta:'أربعة', noTa:'أربع'},
+  {v:5, ta:'خمسة',  noTa:'خمس'},
+  {v:6, ta:'ستة',   noTa:'ست'},
+  {v:7, ta:'سبعة',  noTa:'سبع'},
+  {v:8, ta:'ثمانية',noTa:'ثماني'},
+  {v:9, ta:'تسعة',  noTa:'تسع'},
+  {v:10,ta:'عشرة',  noTa:'عشر'}
+];
+
+// يشفّر مصفوفة {text, reason} معًا ويحافظ على مكان الإجابة الصحيحة
+function shuffleOptions(optionObjs, correctText){
+  const arr = optionObjs.slice();
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  const correctIndex = arr.findIndex(o=>o.text===correctText);
+  return {opts: arr.map(o=>o.text), reasons: arr.map(o=>o.reason), correctIndex};
+}
+
+/* ---------- بِنية أولى: مطابقة العدد (٣-١٠) للمعدود في التذكير والتأنيث ---------- */
+function buildMatchingPool(values){
+  const chosen = values.map(v => nums3to10.find(n => n.v === v));
+  const qs = [];
+  for(let i=0;i<10;i++){
+    for(let j=0;j<chosen.length;j++){
+      const useMasc = (i+j)%2===0;
+      const noun = useMasc ? pairs[i].mp : pairs[i].fp;
+      const numObj = chosen[j];
+      const neighbor = chosen[(j+1)%chosen.length];
+      const correct = useMasc ? numObj.ta : numObj.noTa;
+      const wrongSameNum = useMasc ? numObj.noTa : numObj.ta;
+      const wrongNeighborSame = useMasc ? neighbor.ta : neighbor.noTa;
+      const wrongNeighborOpp  = useMasc ? neighbor.noTa : neighbor.ta;
+
+      const correctReason = `«${correct}» صحيحة لأن المعدود «${noun}» ${useMasc?'مذكَّر':'مؤنَّث'}، والعدد من (٣-١٠) يُخالف المعدود في التذكير والتأنيث.`;
+      const wrongSameNumReason = `«${wrongSameNum}» صيغة العدد (${numObj.v}) الخاصة بمعدود ${useMasc?'مؤنَّث':'مذكَّر'}، لكن معدودنا هنا «${noun}» ${useMasc?'مذكَّر':'مؤنَّث'}، فهذا خطأ. الصواب «${correct}».`;
+      const wrongNeighborSameReason = `«${wrongNeighborSame}» هذه صيغة العدد (${neighbor.v}) وليس العدد المطلوب (${numObj.v})، فهذا خطأ. الصواب «${correct}».`;
+      const wrongNeighborOppReason = `«${wrongNeighborOpp}» خطأ من ناحيتين معًا: العدد (${neighbor.v}) وليس (${numObj.v})، والصياغة لا تناسب معدودًا ${useMasc?'مذكَّرًا':'مؤنَّثًا'}. الصواب «${correct}».`;
+
+      const optionObjs = [
+        {text:correct, reason:correctReason},
+        {text:wrongSameNum, reason:wrongSameNumReason},
+        {text:wrongNeighborSame, reason:wrongNeighborSameReason},
+        {text:wrongNeighborOpp, reason:wrongNeighborOppReason}
+      ];
+      const {opts, reasons, correctIndex} = shuffleOptions(optionObjs, correct);
+      qs.push({
+        title: `اختر الصيغة الصحيحة للعدد (${numObj.v}) مع كلمة «${noun}»:`,
+        sentence: null,
+        options: opts,
+        reasons,
+        correctIndex
+      });
+    }
+  }
+  return qs;
+}
+
+/* ---------- بِنية ثانية: إعراب تمييز العدد حسب فئته ---------- */
+const TAMYIZ_POOLS = {
+  A: [3,4,5,6,7,8,9,10],
+  B: [13,14,16,17,18,23,34,45,56,67,78,89,99,15,24,35,29,52],
+  C: [100,200,300,400,500,600,700,800,900,1000]
+};
+const ROLE = {
+  JAMA: 'تمييز جمع مجرور',
+  MANSUB: 'تمييز مفرد منصوب',
+  MAJRUR_MUDAF: 'تمييز مفرد مجرور (مضاف إليه)',
+  FAEL: 'فاعل مرفوع'
+};
+const RULE_DESC = {
+  [ROLE.JAMA]: 'الأعداد من (٣-١٠) يأتي تمييزها جمعًا مجرورًا',
+  [ROLE.MANSUB]: 'الأعداد من (١١-٩٩) يأتي تمييزها مفردًا منصوبًا',
+  [ROLE.MAJRUR_MUDAF]: 'المئة والألف ومضاعفاتهما يأتي تمييزها مفردًا مجرورًا (مضافًا إليه)'
+};
+const WRONG_ONLY_TEXT = {
+  [ROLE.JAMA]: (numVal)=> `«تمييز جمع مجرور» تُستخدم مع الأعداد من (٣-١٠) فقط، والعدد هنا (${numVal}) ليس من هذه الفئة`,
+  [ROLE.MANSUB]: (numVal)=> `«تمييز مفرد منصوب» تُستخدم مع الأعداد من (١١-٩٩) فقط، والعدد هنا (${numVal}) ليس من هذه الفئة`,
+  [ROLE.MAJRUR_MUDAF]: (numVal)=> `«تمييز مفرد مجرور (مضاف إليه)» تُستخدم مع المئة والألف ومضاعفاتهما فقط، والعدد هنا (${numVal}) ليس كذلك`,
+  [ROLE.FAEL]: ()=> `«فاعل مرفوع» إعراب لا علاقة له بتمييز العدد أصلًا؛ فالسؤال هنا عن إعراب الاسم الذي يلي العدد (التمييز)، لا عن فاعل الجملة`
+};
+
+function buildTamyizPool(cat, count){
+  const pool = TAMYIZ_POOLS[cat];
+  const qs = [];
+  for(let n=0;n<count;n++){
+    // إزاحة فهرس الكلمة عند كل دورة كاملة من pool لتفادي تطابق الفهرسين
+    // (يحدث تكرار حرفي للسؤال إن كان طول pool يساوي طول pairs، كما في فئة C)
+    const p = pairs[(n + Math.floor(n/pool.length)) % pairs.length];
+    const numVal = pool[n % pool.length];
+    let sentence, correctRole, tamyizWord;
+    if(cat==='A'){
+      tamyizWord = p.mp;
+      sentence = `قرأتُ <span class="num">${numVal}</span> ${tamyizWord}ٍ.`;
+      correctRole = ROLE.JAMA;
+    } else if(cat==='B'){
+      tamyizWord = p.m;
+      sentence = `قرأتُ <span class="num">${numVal}</span> ${tamyizWord}ًا.`;
+      correctRole = ROLE.MANSUB;
+    } else {
+      tamyizWord = p.m;
+      sentence = `قرأتُ <span class="num">${numVal}</span> ${tamyizWord}ٍ.`;
+      correctRole = ROLE.MAJRUR_MUDAF;
+    }
+    const correctReason = `صحيح: ${RULE_DESC[correctRole]}، والعدد هنا (${numVal})، لذلك تمييزه «${tamyizWord}» يُعرب «${correctRole}».`;
+    const optionObjs = Object.values(ROLE).map(role=>{
+      if(role===correctRole) return {text:role, reason:correctReason};
+      return {text:role, reason:`خطأ: ${WRONG_ONLY_TEXT[role](numVal)}. والصواب «${correctRole}»، لأن ${RULE_DESC[correctRole]}.`};
+    });
+    const {opts, reasons, correctIndex} = shuffleOptions(optionObjs, correctRole);
+    qs.push({
+      title: 'ما إعراب التمييز (المعدود) في الجملة الآتية؟',
+      sentence, options: opts, reasons, correctIndex
+    });
+  }
+  return qs;
+}
+
+/* ---------- بِنية ثالثة: إعراب العدد نفسه حسب موقعه في الجملة ---------- */
+const POSITION_COND = {
+  'فاعل مرفوع': 'إذا وقع العدد بعد فعل وكان جوابًا عن (مَن)',
+  'مبتدأ مؤخَّر مرفوع': 'إذا سبق العدد شبه جملة (جار ومجرور أو ظرف) في محل رفع خبر مقدَّم',
+  'مفعول به منصوب': 'إذا سبق العدد فعل وفاعل',
+  'اسم مجرور بحرف الجر': 'إذا سبق العدد حرف جر',
+  'خبر مرفوع': 'إذا سبق العدد مبتدأ في جملة اسمية'
+};
+const POSITION_ROLES = Object.keys(POSITION_COND);
+const POSITION_WHY = {
+  'فاعل مرفوع': 'وقع بعد فعل وكان جوابًا عن (مَن)',
+  'مبتدأ مؤخَّر مرفوع': 'سبقته شبه جملة (جار ومجرور أو ظرف) في محل رفع خبر مقدَّم',
+  'مفعول به منصوب': 'سبقه فعل وفاعل',
+  'اسم مجرور بحرف الجر': 'سبقه حرف جر',
+  'خبر مرفوع': 'سبقه مبتدأ في جملة اسمية'
+};
+// يبني صيغة التمييز الصحيحة نحويًا بحسب فئة العدد:
+// ٣-١٠ → جمع مجرور (بالإضافة) | ١١-٩٩ → مفرد منصوب
+function tamyizFor(num, p){
+  return num <= 10 ? p.mp : `${p.m}ًا`;
+}
+
+const TEMPLATES = {
+  FAEL:    { role:'فاعل مرفوع',           build:(num,p)=> `جاء <span class="num">${num}</span> ${tamyizFor(num,p)}.`,
+             nums:[3,5,7,20,45,60,70,80,90,12,4,6,8,25,50,65,75,85,95,13] },
+  MUBTADA: { role:'مبتدأ مؤخَّر مرفوع',    build:(num,p)=> `عندي <span class="num">${num}</span> ${tamyizFor(num,p)}.`,
+             nums:[10,13,15,20,30,45,60,75,90,99,11,14,16,22,33,48,55,68,82,97] },
+  MAFUL:   { role:'مفعول به منصوب',       build:(num,p)=> `رأيتُ <span class="num">${num}</span> ${tamyizFor(num,p)}.`,
+             nums:[4,6,8,11,17,25,40,55,63,84,5,7,9,12,19,28,42,58,66,88] },
+  MAJRUR:  { role:'اسم مجرور بحرف الجر',  build:(num,p)=> `مررتُ بـ<span class="num">${num}</span> ${tamyizFor(num,p)}.`,
+             nums:[3,5,9,14,19,26,38,47,58,73,4,6,10,15,21,29,39,49,59,77] },
+  KHABAR:  { role:'خبر مرفوع',            build:(num)=>   `عمري <span class="num">${num}</span> عامًا.`,
+             nums:[15,18,20,22,25,30,35,40,50,60,16,19,21,24,28,32,36,45,55,65] }
+};
+
+function makePositionQ(sentence, correctRole){
+  const others = POSITION_ROLES.filter(r=>r!==correctRole);
+  for(let i=others.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [others[i],others[j]]=[others[j],others[i]]; }
+  const chosenWrong = [others[0], others[1], others[2]];
+  const correctReason = `صحيح: العدد هنا ${POSITION_WHY[correctRole]}، فإعرابه «${correctRole}».`;
+  const optionObjs = [correctRole, ...chosenWrong].map(role=>{
+    if(role===correctRole) return {text:role, reason:correctReason};
+    return {text:role, reason:`خطأ: «${role}» تكون ${POSITION_COND[role]}، وهذا غير متحقق في هذه الجملة. الصواب «${correctRole}» لأن العدد ${POSITION_WHY[correctRole]}.`};
+  });
+  const {opts, reasons, correctIndex} = shuffleOptions(optionObjs, correctRole);
+  return {
+    title: 'ما إعراب العدد الوارد في الجملة الآتية؟',
+    sentence, options: opts, reasons, correctIndex
+  };
+}
+
+function buildPositionPool(templateKey, count){
+  const t = TEMPLATES[templateKey];
+  const qs = [];
+  for(let r=0;r<count;r++){
+    const p = pairs[r % pairs.length];
+    const num = t.nums[r % t.nums.length];
+    qs.push(makePositionQ(t.build(num,p), t.role));
+  }
+  return qs;
+}
+
+/* ---------- مستويات الصعوبة: كل مستوى يجمع من المواضيع الثلاثة بدرجة تعقيد مناسبة ---------- */
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function buildEasy(){
+  const part1 = buildMatchingPool([3,4,5]).slice(0,17);      // مطابقة بأعداد صغيرة وتباين واضح
+  const part2 = buildTamyizPool('A',17);                     // تمييز الأعداد (٣-١٠): الحالة الأوضح بصريًا
+  const part3 = [...buildPositionPool('FAEL',8), ...buildPositionPool('MAFUL',8)]; // مواقع مباشرة: فاعل/مفعول به
+  return shuffleArray([...part1, ...part2, ...part3]);
+}
+
+function buildMedium(){
+  const part1 = buildMatchingPool([6,7]).slice(0,17);         // أعداد أقل تداولًا
+  const part2 = buildTamyizPool('B',17);                      // تمييز الأعداد (١١-٩٩)
+  const part3 = buildPositionPool('MAJRUR',16);                // موقع أكثر تجريدًا: الاسم المجرور بحرف الجر
+  return shuffleArray([...part1, ...part2, ...part3]);
+}
+
+function buildHard(){
+  const part1 = buildMatchingPool([8,9,10]).slice(0,16);      // يشمل صيغة (ثماني/ثمانية) الأكثر التباسًا
+  const part2 = buildTamyizPool('C',17);                       // تمييز المئة والألف: يستلزم فهم الإضافة
+  const part3 = [...buildPositionPool('MUBTADA',9), ...buildPositionPool('KHABAR',8)]; // أصعب المواقع: مبتدأ مؤخر وخبر
+  return shuffleArray([...part1, ...part2, ...part3]);
+}
+
+/* ======================= حالة التطبيق ======================= */
+
+const LEVELS = [
+  {id:1, title:'سهل', sub:'أساسيات مطابقة العدد وتمييزه وإعرابه، بأرقام وصياغات مباشرة', build:buildEasy},
+  {id:2, title:'متوسط', sub:'أعداد أقل تداولًا، وتمييز الأعداد المركّبة، ومواقع إعرابية أكثر تجريدًا', build:buildMedium},
+  {id:3, title:'صعب', sub:'صيغ ملتبسة، وتمييز المئة والألف، وأصعب مواقع إعراب العدد في الجملة', build:buildHard}
+];
+
+let state = { levelIdx:null, questions:[], current:0, score:0, wrongLog:[], answered:false };
+const app = document.getElementById('app');
+
+function renderLevelSelect(){
+  state = { levelIdx:null, questions:[], current:0, score:0, wrongLog:[], answered:false };
+  const wrap = document.createElement('div');
+  wrap.className = 'levels';
+  LEVELS.forEach((lv, i)=>{
+    const card = document.createElement('div');
+    card.className = 'card level-card';
+    card.tabIndex = 0;
+    card.innerHTML = `
+      <div class="level-num">${['أ','ب','ج'][i]}</div>
+      <div class="level-info"><h3>${lv.title}</h3><p>${lv.sub}</p></div>
+      <div class="level-meta">٥٠ سؤالًا</div>
+    `;
+    const go = ()=> startLevel(i);
+    card.addEventListener('click', go);
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); go(); } });
+    wrap.appendChild(card);
+  });
+  app.innerHTML = '';
+  app.appendChild(wrap);
+}
+
+function startLevel(i){
+  state.levelIdx = i;
+  state.questions = LEVELS[i].build();
+  state.current = 0;
+  state.score = 0;
+  state.wrongLog = [];
+  renderQuestion();
+}
+
+function renderQuestion(){
+  state.answered = false;
+  const q = state.questions[state.current];
+  const total = state.questions.length;
+  const pct = Math.round((state.current/total)*100);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'card quiz-wrap';
+  wrap.innerHTML = `
+    <div class="quiz-head">
+      <span>${LEVELS[state.levelIdx].title}</span>
+      <span>السؤال ${state.current+1} من ${total}</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    ${q.sentence ? `<div class="q-sentence">${q.sentence}</div>` : ''}
+    <p class="q-title">${q.title}</p>
+    <div class="options"></div>
+    <div class="explain"></div>
+    <div class="footer-row">
+      <button class="ghost" id="quitBtn">إنهاء والعودة للمستويات</button>
+      <button class="primary" id="nextBtn" disabled>${state.current===total-1 ? 'إنهاء الاختبار' : 'السؤال التالي'}</button>
+    </div>
+  `;
+  app.innerHTML = '';
+  app.appendChild(wrap);
+
+  const optWrap = wrap.querySelector('.options');
+  q.options.forEach((optText, idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = optText;
+    btn.addEventListener('click', ()=> selectAnswer(idx, wrap, q));
+    optWrap.appendChild(btn);
+  });
+
+  wrap.querySelector('#nextBtn').addEventListener('click', ()=>{
+    if(state.current < total-1){ state.current++; renderQuestion(); }
+    else { renderResults(); }
+  });
+  wrap.querySelector('#quitBtn').addEventListener('click', renderLevelSelect);
+}
+
+function selectAnswer(idx, wrap, q){
+  if(state.answered) return;
+  state.answered = true;
+  const buttons = wrap.querySelectorAll('.opt');
+  buttons.forEach((b,i)=>{
+    b.disabled = true;
+    if(i===q.correctIndex) b.classList.add('correct');
+    else if(i===idx) b.classList.add('wrong');
+  });
+  const isCorrect = idx === q.correctIndex;
+  if(isCorrect) state.score++;
+  else state.wrongLog.push({
+    title:q.title, sentence:q.sentence,
+    chosen:q.options[idx], correct:q.options[q.correctIndex], reason:q.reasons[q.correctIndex]
+  });
+
+  const ex = wrap.querySelector('.explain');
+  ex.style.display = 'block';
+  ex.innerHTML = '';
+
+  if(!isCorrect){
+    const wrongBox = document.createElement('div');
+    wrongBox.className = 'explain-box is-wrong';
+    wrongBox.innerHTML = `<b>❌ إجابتك خطأ:</b> ${q.reasons[idx]}`;
+    ex.appendChild(wrongBox);
+  }
+  const rightBox = document.createElement('div');
+  rightBox.className = 'explain-box is-right';
+  rightBox.innerHTML = `<b>✅ ${isCorrect ? 'إجابة صحيحة:' : 'الصواب:'}</b> ${q.reasons[q.correctIndex]}`;
+  ex.appendChild(rightBox);
+
+  wrap.querySelector('#nextBtn').disabled = false;
+}
+
+function renderResults(){
+  const total = state.questions.length;
+  const pct = Math.round((state.score/total)*100);
+  const circumference = 2*Math.PI*60;
+  const dash = circumference * (pct/100);
+
+  let msg;
+  if(pct>=90) msg = 'إتقان ممتاز لقواعد هذا المستوى.';
+  else if(pct>=70) msg = 'مستوى جيد جدًا، راجع الأخطاء لتثبيت القاعدة.';
+  else if(pct>=50) msg = 'مستوى مقبول، يُنصح بمراجعة القاعدة قبل الانتقال للمستوى التالي.';
+  else msg = 'يُنصح بمراجعة قواعد العدد والمعدود من جديد قبل إعادة المحاولة.';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'card results';
+  wrap.innerHTML = `
+    <div class="score-ring">
+      <svg width="150" height="150">
+        <circle cx="75" cy="75" r="60" stroke="#101620" stroke-width="12" fill="none"/>
+        <circle cx="75" cy="75" r="60" stroke="#c9a227" stroke-width="12" fill="none"
+          stroke-dasharray="${circumference}" stroke-dashoffset="${circumference-dash}" stroke-linecap="round"/>
+      </svg>
+      <div class="pct">${pct}٪</div>
+    </div>
+    <h2>${LEVELS[state.levelIdx].title} — النتيجة</h2>
+    <p class="msg">أجبتَ إجابة صحيحة عن ${state.score} من ${total} — ${msg}</p>
+    ${state.wrongLog.length ? '<div class="review-list" id="reviewList"></div>' : ''}
+    <div class="footer-row">
+      <button class="ghost" id="backBtn">العودة إلى المستويات</button>
+      <button class="primary" id="retryBtn">إعادة هذا المستوى</button>
+    </div>
+  `;
+  app.innerHTML = '';
+  app.appendChild(wrap);
+
+  if(state.wrongLog.length){
+    const list = wrap.querySelector('#reviewList');
+    state.wrongLog.forEach(item=>{
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      div.innerHTML = `
+        ${item.sentence ? `<div class="rq">${item.sentence}</div>` : ''}
+        <div class="rq">${item.title}</div>
+        <div class="ra">إجابتك: ${item.chosen} — <span class="rc">الصحيح: ${item.correct}</span></div>
+        <div class="rc" style="margin-top:6px;color:var(--parchment-dim);">${item.reason}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  wrap.querySelector('#backBtn').addEventListener('click', renderLevelSelect);
+  wrap.querySelector('#retryBtn').addEventListener('click', ()=> startLevel(state.levelIdx));
+}
+
+renderLevelSelect();
+</script>
+</body>
+</html>
